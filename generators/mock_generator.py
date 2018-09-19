@@ -10,18 +10,20 @@ class MockGenerator(BaseGenerator):
         self.ref_tempo = ref_tempo
         self.multiples = np.exp2([0, 1, 2, 3, 4, 5, 6]).astype(int)
 
-    def get_sample(self):
+    def get_sample_eval(self):
         possible_mult_count = 4
 
         ref_pos = random.randint(self.ref_tempo, self.ref_tempo * 2 - 1)
-        multiple_index = random.randint(0, 3)
+        multiple_index = random.randint(0, possible_mult_count - 1)
+        while ref_pos * self.multiples[multiple_index] >= self.freq_range: multiple_index -= 1
+
         multiple = self.multiples[multiple_index]
         real_pos = ref_pos * multiple
 
         # Generate some noise
         itempo = np.random.rand(self.freq_range)
         itempo /= sum(itempo)
-        itempo *= 1.2
+        itempo *= random.uniform(0.9, 1.5)
 
         hmultiples = np.zeros(self.freq_range)
         label = np.zeros(possible_mult_count)
@@ -48,4 +50,10 @@ class MockGenerator(BaseGenerator):
             if pos not in range(self.freq_range): break
             hmultiples[pos] = 1 if m == 1 else 0.5
 
-        return np.stack((itempo / np.sum(itempo), hmultiples), 1), label
+        return np.stack((itempo / np.sum(itempo), hmultiples), 1), label, ref_pos
+
+    def get_sample(self):
+        i, l, _ = self.get_sample_eval()
+        return i, l
+
+
