@@ -11,7 +11,14 @@ class BeatmapEntry(object):
     def std_rating(self):
         return self.std_diffs[0] if len(self.std_diffs) else -1
 
-    def get_path(self, osu_root, file = ''):
+    @property
+    def avg_bpm(self):
+        timingpoints = list(filter(lambda x: isinstance(x, KeyTimingPoint) and x.mpb > 0, self.timingpoints))
+        if len(timingpoints) == 0: return 0
+        avg_mpb = sum([t.mpb for t in timingpoints]) / len(timingpoints)
+        return 60000 / avg_mpb
+
+    def get_path(self, osu_root, file=''):
         return f'{osu_root}\\Songs\\{self.folder_name}\\{file}'
 
     def __str__(self) -> str:

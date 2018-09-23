@@ -1,6 +1,6 @@
 import operator
 import re
-from osu.utils import is_float
+from helpers.osu.utils import is_float
 
 OPERATORS = {'~': operator.contains, '=': operator.eq, '>': operator.gt, '<': operator.lt, '>=': operator.ge,
              '<=': operator.le}

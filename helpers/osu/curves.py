@@ -1,5 +1,5 @@
-from osu.maths import bezier_curve, catmull_chain, perfect_curve, Coordinate
-from osu.utils import binary_search
+from helpers.osu.maths import bezier_curve, catmull_chain, perfect_curve, Coordinate
+from helpers.osu.utils import binary_search
 import numpy.linalg as linal
 import numpy as np
 import math

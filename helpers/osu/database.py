@@ -2,8 +2,8 @@
 from struct import unpack_from
 from typing import List
 
-from osu.models import BeatmapEntry, KeyTimingPoint, InheritedTimingPoint
-from osu.filter import filter_items, parse_filters
+from helpers.osu.models import BeatmapEntry, KeyTimingPoint, InheritedTimingPoint
+from helpers.osu.filter import filter_items, parse_filters
 
 
 class DatabaseReader:
@@ -175,9 +175,11 @@ def read_timing_point(reader: DatabaseReader):
     reader.read_bool()  # ret.inherited =
     if mpb > 0:
         ret = KeyTimingPoint()
-        ret.offset = offset
+        ret.mpb = mpb
+        ret.slider_multiplayer = 1
     else:
         ret = InheritedTimingPoint()
         ret.slider_multiplayer = mpb / -100
         # TODO add parent
+    ret.offset = offset
     return ret

@@ -1,7 +1,7 @@
-from osu.models import *
-from osu.curves import *
-from osu.utils import original_type
-from osu.maths import Coordinate
+from helpers.osu.models import *
+from helpers.osu.curves import *
+from helpers.osu.utils import original_type
+from helpers.osu.maths import Coordinate
 
 
 def read_line(f):
