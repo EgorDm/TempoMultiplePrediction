@@ -61,7 +61,7 @@ def read_timing_points(f, ret):
             tp.slider_multiplayer = mpb / -100
             tp.parent = last_ktp
         tp.offset = offset
-        tp.meter = int(ltp[2])
+        tp.meter = int(ltp[2]) if len(ltp) > 2 else 4
         ret.timingpoints.append(tp)
 
 
@@ -72,16 +72,17 @@ def read_hitobjects(f, ret):
         ret.hitobjects.append(parse_hitobject(lho))
 
 
-def read(path):
+def read(path, sections=None):
+    if sections is None: sections = ['meta', 'difficulty', 'timing', 'objects']
     file = None
     ret = Beatmap()
 
     try:
         file = open(path, 'r', encoding='utf8')
-        read_meta(file, ret)
-        read_difficulty(file, ret)
-        read_timing_points(file, ret)
-        read_hitobjects(file, ret)
+        if 'meta' in sections: read_meta(file, ret)
+        if 'difficulty' in sections: read_difficulty(file, ret)
+        if 'timing' in sections: read_timing_points(file, ret)
+        if 'objects' in sections: read_hitobjects(file, ret)
     except Exception as e:
         print(path)
         print(e)
