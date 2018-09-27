@@ -8,6 +8,7 @@ import numpy as np
 import libtempo_py as lt
 import pandas as pd
 import h5py
+from tqdm import tqdm
 
 import settings
 from helpers import sample_utils, osu
@@ -121,13 +122,36 @@ def merge_if(l, predicate, merge_f):
     return ret
 
 
+def save_dataset(samples: np.ndarray, i: int):
+    with open(f'data/dataset_part_{i}.npz', 'wb') as file:
+        header = {'part': i, 'samples': len(samples)}
+        np.save(file, header)
+        np.save(file, samples)
+
+
 @click.command()
 def main():
     dataset = pd.read_csv("data/dataset_entries.csv", dtype=dict(avg_bpm=np.float64, time_total=np.int32))
 
     samples = []
-    for i, entry in dataset.iterrows():
-        samples += process_entries(entry)
+    dataset_part = 0
+    samples_per_dataset = 500
+    error_entries = []
+    bar = tqdm(total=len(dataset.index))
+    for i, entry in tqdm(dataset.iterrows()):
+        try:
+            samples += process_entries(entry)
+        except Exception as e:
+            error_entries.append(entry)
+            print(f'Failed processing {entry.title}. {str(e)}')
+
+        bar.update(1)
+
+        if len(samples) > samples_per_dataset:
+            save_dataset(samples, dataset_part)
+            dataset_part += 1
+
+    save_dataset(np.array(samples), dataset_part)
 
 
 if __name__ == "__main__":
