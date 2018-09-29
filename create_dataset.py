@@ -32,7 +32,7 @@ def process_entries(entry):
 
     # Tempogram
     tempogram_y_axis = lt.wrap_arrayD(np.arange(*bpm_range))
-    tempogram, tempogram_y_axis, t = lt.novelty_curve_to_tempogram(novelty_curve, tempogram_y_axis, novelty_curve_sr, 8)
+    tempogram, t = lt.novelty_curve_to_tempogram(novelty_curve, tempogram_y_axis, novelty_curve_sr, 8)
     cyclic_tempogram, cyclic_tempogram_y_axis = lt.tempogram_to_cyclic_tempogram(tempogram, tempogram_y_axis, ref_tempo=ref_tempo)
     smoothed_tempogram = lt.smoothen_tempogram(cyclic_tempogram, cyclic_tempogram_y_axis, t, 20)
 
@@ -138,7 +138,7 @@ def main():
     samples_per_dataset = 500
     error_entries = []
     bar = tqdm(total=len(dataset.index))
-    for i, entry in tqdm(dataset.iterrows()):
+    for i, entry in dataset.iterrows():
         try:
             samples += process_entries(entry)
         except Exception as e:
@@ -149,9 +149,12 @@ def main():
 
         if len(samples) > samples_per_dataset:
             save_dataset(samples, dataset_part)
+            samples = []
             dataset_part += 1
 
     save_dataset(np.array(samples), dataset_part)
+    print('Failed samples')
+    print(error_entries)
 
 
 if __name__ == "__main__":
