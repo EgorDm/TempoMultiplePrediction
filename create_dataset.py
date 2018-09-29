@@ -25,6 +25,12 @@ def process_entries(entry):
     sample_path = f'{OSU_ROOT}\\Songs\\{entry.folder_name}'
     beatmap = osu.beatmap_reader.read(f'{sample_path}\\{entry.osu_file}', ['timing'])
 
+    # flag = True
+    # key_timingpoints = list(filter(lambda x: isinstance(x, osu.models.KeyTimingPoint), beatmap.timingpoints))
+    # for t in key_timingpoints:
+    #     if t.mpb > 300: flag = False
+    # if flag: return None
+
     audio = lt.audio.AudioWrapper(f'{sample_path}\\{entry.audio_file}')
     audio_mono = lt.wrap_arrayF(np.mean(audio.get_data().to_array(), axis=0))
 

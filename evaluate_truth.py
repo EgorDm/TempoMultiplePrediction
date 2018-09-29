@@ -43,7 +43,7 @@ def eval_sample(x, y, r, model: keras.Model, start=30):
 @click.command()
 @click.option('--dataset', default='data/dataset.npz', help='Dataset file path')
 @click.option('--model', default='dnn_bpm_classify_real_model', help='Model save file')
-@click.option('--weights', default='dnn_bpm_classify_real_weights-002', help='Weigth save file')
+@click.option('--weights', default='dnn_bpm_classify_real_weights-03-0.73', help='Weigth save file')
 @click.option('--count', default=10, help='Count')
 def main(dataset, model, weights, count):
     with open(dataset, 'rb') as f:
