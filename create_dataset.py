@@ -18,6 +18,7 @@ ref_tempo = 60
 bpm_range = (30, 630)
 merge_truth_threshold = 10  # s
 merge_labels_threshold = 4  # s
+section_length_thresh = 60
 
 
 def process_entries(entry):
@@ -63,9 +64,19 @@ def process_entries(entry):
     label_merge_fn = lambda x, y: (merge_sections(x[0], y[0]), x[1])
     label_section_multiple = merge_if(label_section_multiple, label_merge_predicate, label_merge_fn)
 
+    label_section_final = []
+    for s, m in label_section_multiple:
+        if s.end - s.start < section_length_thresh:
+            label_section_final.append((s, m))
+            continue
+
+        tmp = slice_section(s, (s.start + s.end) / 2)
+        for st in tmp:
+            label_section_final.append((st, m))
+
     tempogram_np = np.abs(tempogram.to_array())
     t_np = t.to_array()[:, 0]
-    samples = [(section_to_sample(tempogram_np, t_np, s), s.bpm, m) for s, m in label_section_multiple]
+    samples = [(section_to_sample(tempogram_np, t_np, s), s.bpm, m) for s, m in label_section_final]
 
     return samples
 
@@ -91,7 +102,7 @@ def section_to_sample(tempogram: np.ndarray, t: np.ndarray, s: lt.Section):
 def timingpoints_to_section(tps: List[osu.models.KeyTimingPoint], end_t) -> List[lt.Section]:
     ret = []
     for i in range(len(tps)):
-        end = tps[i + 1].offset if i + 1 < len(tps) else end_t
+        end = tps[i + 1].offset / 1000 if i + 1 < len(tps) else end_t
         tp = tps[i]
         ret.append(lt.Section(abs(tp.offset) / 1000, end, 60000 / tp.mpb, tp.offset / 1000))
     return ret
@@ -122,16 +133,20 @@ def merge_if(l, predicate, merge_f):
     return ret
 
 
-def save_dataset(samples: np.ndarray, i: int):
-    with open(f'data/dataset_part_{i}.npz', 'wb') as file:
+def save_dataset(samples: np.ndarray, i: int, path: str):
+    os.makedirs(path, exist_ok=True)
+
+    with open(f'{path}/dataset_part_{i}.npz', 'wb') as file:
         header = {'part': i, 'samples': len(samples)}
         np.save(file, header)
         np.save(file, samples)
 
 
 @click.command()
-def main():
-    dataset = pd.read_csv("data/dataset_entries.csv", dtype=dict(avg_bpm=np.float64, time_total=np.int32))
+@click.option('--entries', default='data/dataset_entries.csv', help='Entry list')
+@click.option('--dataset_path', default='data/dataset', help='Path to save dataset to')
+def main(entries, dataset_path):
+    dataset = pd.read_csv(entries, dtype=dict(avg_bpm=np.float64, time_total=np.int32))
 
     samples = []
     dataset_part = 0
@@ -148,11 +163,11 @@ def main():
         bar.update(1)
 
         if len(samples) > samples_per_dataset:
-            save_dataset(samples, dataset_part)
+            save_dataset(samples, dataset_part, dataset_path)
             samples = []
             dataset_part += 1
 
-    save_dataset(np.array(samples), dataset_part)
+    save_dataset(np.array(samples), dataset_part, dataset_path)
     print('Failed samples')
     print(error_entries)
 
