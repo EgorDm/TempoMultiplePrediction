@@ -5,7 +5,7 @@ import numpy as np
 
 
 @click.command()
-@click.option('--dataset_path', default='data/dataset', help='Path of your dataset.')
+@click.option('--dataset_path', default='data/full_dataset', help='Path of your dataset.')
 def main(dataset_path):
     data_files = os.listdir(dataset_path)
 
@@ -18,7 +18,7 @@ def main(dataset_path):
 
     samples = np.concatenate(samples, axis=0)
 
-    with open(f'data/dataset/dataset.npz', 'wb') as file:
+    with open(f'data/dataset/dataset_compund.npz', 'wb') as file:
         header = {'samples': len(samples)}
         np.save(file, header)
         np.save(file, samples)

@@ -158,15 +158,14 @@ def main(entries, dataset_path):
     dataset_part = 0
     samples_per_dataset = 500
     error_entries = []
-    bar = tqdm(total=len(dataset.index))
-    for i, entry in dataset.iterrows():
+    start = 11393
+    for i in tqdm(range(start, len(dataset.index))):
+        entry = dataset.iloc[i]
         try:
             samples += process_entries(entry)
         except Exception as e:
             error_entries.append(entry)
             print(f'Failed processing {entry.title}. {str(e)}')
-
-        bar.update(1)
 
         if len(samples) > samples_per_dataset:
             save_dataset(samples, dataset_part, dataset_path)

@@ -6,7 +6,7 @@ def create(n_classes=600):
     hidden_size_1 = int(n_classes/4)
     hidden_size_2 = int(n_classes/8)
     hidden_size_3 = int(n_classes/16)
-    result_classes = 4
+    result_classes = 2
 
     model = Sequential()
     model.add(Flatten(input_shape=(n_classes, 2)))

@@ -1,3 +1,4 @@
+import math
 import multiprocessing
 import os
 
@@ -24,13 +25,13 @@ def eval_sample(x, y, r, model: keras.Model, start=30):
     plt.plot(x[:, 1] * scale, label='Multiples')
     plt.plot(x[:, 0], label='Histogram')
 
-    mps_r = int(multiples[mp] * r - start)
+    mps_r = int(mp * r - start)
     if mps_r < len(x):
         mps = np.zeros(x.shape[0])
         mps[mps_r] = 1 * scale
         plt.plot(mps, label='Predicted')
 
-    mys_r = int(multiples[my] * r - start)
+    mys_r = int(my * r - start)
     if mys_r < len(x):
         mys = np.zeros(x.shape[0])
         mys[mys_r] = 0.8 * scale
@@ -41,17 +42,19 @@ def eval_sample(x, y, r, model: keras.Model, start=30):
 
 
 @click.command()
-@click.option('--dataset', default='data/dataset.npz', help='Dataset file path')
-@click.option('--model', default='dnn_bpm_classify_real_model', help='Model save file')
-@click.option('--weights', default='dnn_bpm_classify_real_weights-03-0.73', help='Weigth save file')
+@click.option('--dataset', default='data/dataset_compound.npz', help='Dataset file path')
+@click.option('--model', default='dnn_bpm_classify_real_comp_model', help='Model save file')
+@click.option('--weights', default='dnn_bpm_classify_real_comp_weights-30-0.885', help='Weigth save file')
 @click.option('--count', default=10, help='Count')
 def main(dataset, model, weights, count):
     with open(dataset, 'rb') as f:
         header = np.load(f)
         samples = np.load(f)
 
+    samples = np.array([s for s in samples if 0 < s[2] <= 2])
+
     xs = np.array(list(map(lambda v: v, samples[:, 0])))
-    ys = np.array(list(map(lambda v: to_categorical(v - 1, 4), samples[:, 2])))
+    ys = np.array(list(map(lambda v: to_categorical(int(math.log2(v)), 2), samples[:, 2])))
 
     model = models.load_model(model, weights)
 
