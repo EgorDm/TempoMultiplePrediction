@@ -1,5 +1,5 @@
 from keras import Sequential, Input
-from keras.layers import Flatten, Dense
+from keras.layers import Flatten, Dense, Dropout
 
 
 def create(n_classes=600):
@@ -11,7 +11,9 @@ def create(n_classes=600):
     model = Sequential()
     model.add(Flatten(input_shape=(n_classes, 2)))
     model.add(Dense(hidden_size_1, activation='relu'))
+    model.add(Dropout(0.4))
     model.add(Dense(hidden_size_2, activation='relu'))
+    model.add(Dropout(0.4))
     model.add(Dense(hidden_size_3, activation='relu'))
     model.add(Dense(result_classes, activation='sigmoid'))
     model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
